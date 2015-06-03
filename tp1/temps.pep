@@ -1,5 +1,5 @@
 ; ******************************************************************** 
-;       Programme: TP1.TXT     version PEP813 sous Windows
+;       Programme: temps.txt     version PEP813 sous Windows
 ;
 ;       titre: Le temps écoulé
 ;
