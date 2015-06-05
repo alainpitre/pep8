@@ -1,11 +1,12 @@
+
 ; ******************************************************************** 
 ;       Programme: temps.txt     version PEP813 sous Windows
 ;
-;       titre: Le temps écoulé
+;       titre: Le temps Ã©coulÃ©
 ;
-;       Le programme désiré devra fonctionner sous Windows avec la version PEP 813.
-;       Suite à une demande à l'utilisateur (lui expliquant le mode de fonctionnement),
-;       vous devrez calculer le temps écoulé entre 2 heures.
+;       Le programme dÃ©sirÃ© devra fonctionner sous Windows avec la version PEP 813.
+;       Suite Ã  une demande Ã  l'utilisateur (lui expliquant le mode de fonctionnement),
+;       vous devrez calculer le temps Ã©coulÃ© entre 2 heures.
 ;
 ;       auteur:   Alain Pitre
 ;       courriel: pitre.alain@courrier.uqam.ca
@@ -21,9 +22,9 @@ depart:  LDA     -1,i
          STRO    msgdebut,d
          BR      main
 
-main:    LDBYTEA caract,d
-         CPA     10,i
-         BREQ    calcul
+main:    LDA     0,i
+         STA     heures,d
+         STA     minutes,d
 
 boucle:  CHARI   caract,d 
          LDBYTEA caract,d
@@ -34,9 +35,6 @@ boucle:  CHARI   caract,d
          CPA     10,i
          BREQ    sortir 
          LDX     0,i
-         LDA     0,i
-         STA     heures,d
-         STA     minutes,d
          BR      lire  
 
 lirehr:  CHARI   caract,d
@@ -146,7 +144,7 @@ ajout1:  STA     total1,d
          BREQ    main 
 
 ajout2:  STA     total2,d
-         BREQ    main         
+         BREQ    calcul         
 
 calcul:  LDA     total2,d
          CPA     total1,d
@@ -200,30 +198,29 @@ sortir:  LDA     total2,d
 fin:     STRO    msgfin,d 
          STOP
 
-; Déclaration des variables
+; DÃ©claration des variables
 
-msgentre:.ASCII  "Bienvenu au programme: Le Temps Écoulé\n"
+msgentre:.ASCII  "Bienvenu au programme: Le Temps Ã‰coulÃ©\n"
          .ASCII  "----------------------------------------"
          .ASCII  "\nFORMAT: H HH H.MM ou HH.MM"
-         .ASCII  "\nQUITTER: appuyez sur la touche entrée"
+         .ASCII  "\nQUITTER: appuyez sur la touche entrÃ©e"
          .ASCII  "\nEX: 3 8  3.05  12.20"
          .BYTE   0 
-msgdebut:.ASCII  "\n\nEntrez les heures désirées: "
+msgdebut:.ASCII  "\n\nEntrez les heures dÃ©sirÃ©es: "
          .BYTE   0
-msgresul:.ASCII  "\nTemps écoulé: "
+msgresul:.ASCII  "\nTemps Ã©coulÃ©: "
          .BYTE   0
-msginval:.ASCII  "\nEntrée invalide"
+msginval:.ASCII  "\nEntrÃ©e invalide"
          .BYTE   0 
-msgfin:  .ASCII  "\nVous avez quitté avec succès.\n"
+msgfin:  .ASCII  "\nVous avez quittÃ© avec succÃ¨s.\n"
          .BYTE   0
 
 
 caract:  .BLOCK  1          ; #1h
 tmpacc:  .BLOCK  2          ; #2h
-heures:  .BLOCK  2          ; #2h
-minutes: .BLOCK  2          ; #2h
+heures:  .BLOCK  2          ; #2d
+minutes: .BLOCK  2          ; #2d
 total1:  .BLOCK  2          ; #2d
 total2:  .BLOCK  2          ; #2d
-
 
          .END 
