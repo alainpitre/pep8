@@ -13,132 +13,119 @@
 ;       cours:    INF2170
 ; ********************************************************************
 
-main:    LDA     -1,i        ; initialisation des variables
+         STRO    msgentre,d 
+
+depart:  LDA     -1,i
          STA     total1,d
          STA     total2,d
+         STRO    msgdebut,d
+         BR      main
+
+main:    LDBYTEA caract,d
+         CPA     10,i
+         BREQ    calcul
+
+boucle:  CHARI   caract,d 
+         LDBYTEA caract,d
+         CPA     ' ',i
+         BREQ    boucle
+         CPA     '.',i
+         BREQ    boucle
+         CPA     10,i
+         BREQ    sortir 
+         LDX     0,i
          LDA     0,i
-         STA     col,d
-
-         STRO    demande,d
-
-exec:    LDA     -1,i         ; reinitialistion des variables
          STA     heures,d
          STA     minutes,d
-         LDA     0,i
-         STA     entree,d
-         STA     nbCarac,d
-         LDX     col,d       ; recupérer la colonne courante 
-         BR      lire
+         BR      lire  
 
-lire:    CHARI   entree,d    ; ajouter une lettre
-         LDBYTEA entree,d
-
-         ADDX    1,i
-         CPX     20,i
-         BRGE    sortir
-
-         CPA     10,i        ; sortir si touche ENTER
-         BREQ    sortir
-
-         CPA     '.',i       ; analyse l'entrée
-         BREQ    lireMin
-         CPA     ' ',i       
-         BREQ    break
-         CPA    '0',i
-         BRLT    invalid
-         CPA    '9',i
-         BRGT    invalid
-
-         SUBA    '0',i
-         STA     tmpAcc,d 
-
-         LDA     heures,d
-         CPA     -1,i
-         BREQ    initHr
-         BR      lireHr
-
-break:   LDA     heures,d 
-         CPA     -1,i
-         BREQ    lire
-         BR      case
-
-initHr:  LDA     0,i
+lirehr:  CHARI   caract,d
+         LDBYTEA caract,d
+lire:    ADDX    1,i
+         CPA     '0',i
+         BRLT    paschif
+         CPA     '9',i
+         BRGT    paschif
+         SUBA    '0',i   
+         STA     tmpacc,d 
+         CPX     2,i
+         BREQ    dixhr 
+         CPA     0,i
+         BREQ    avance
          STA     heures,d
-         BR      lireHr
+         BR      lirehr
 
-lireHr:  ASLA
+avance:  CHARI   caract,d
+         LDBYTEA caract,d
+
+paschif: CPA     '.',i
+         BREQ    finhr    
+         CPA     ' ',i
+         BREQ    hr_min 
+         CPA     10,i
+         BREQ    hr_min
+         BR      invalid 
+
+dixhr:   LDA     heures,d
+         ASLA
          ASLA
          ADDA    heures,d
          ASLA
-         ADDA    tmpAcc,d
+         ADDA    tmpacc,d 
+         STA     heures,d
+         BR      avance
+
+finhr:   LDA     heures,d
          CPA     23,i
          BRGT    invalid
-         STA     heures,d
-         BR      lire  
+         LDX     0,i
 
-lireMin: ADDX    1,i
+liremin: CHARI   caract,d
+         LDBYTEA caract,d
 
-         CHARI   entree,d
-         LDBYTEA entree,d
-         
+         ADDX    1,i
          CPA     '0',i
          BRLT    invalid
          CPA     '9',i
          BRGT    invalid
-
-         SUBA    '0',i
-         STA     tmpAcc,d 
-
-         LDA     nbCarac,d   ; increment caractère minute
-         ADDA    1,i
-         STA     nbCarac,d
-
-         CPA     1,i
-         BREQ    dixaine
-         CPA     2,i
-         BREQ    unitee
-         BR      invalid         
-
-dixaine: LDA     tmpAcc,d
+         SUBA    '0',i   
+         ADDA    minutes,d
+         STA     tmpacc,d
+         CPX     2,i
+         BREQ    finmin
+         CPX     1,i
+         BREQ    dixmin
+        
+dixmin:  ASLA
          ASLA
-         ASLA
-         ADDA    tmpAcc,d
+         ADDA    tmpacc,d 
          ASLA
          STA     minutes,d
-         BR      lireMin
+         BR      liremin
 
-unitee:  LDA     tmpAcc,d
-         ADDA    minutes,d
+finmin:  STA     minutes,d
          CPA     59,i
          BRGT    invalid
-         STA     minutes,d
-         BR      lireMin
+         CHARI   caract,d
+         LDBYTEA caract,d
 
-sortir:  LDA     active,d 
-         CPA     1,i
-         BRNE    calcul 
-         BR      case
+         CPA     10,i
+         BREQ    hr_min 
+         CPA     ' ',i
+         BREQ    hr_min 
+         BR      invalid
 
-invalid: STRO    msgInv,d 
-         BR      main
-         
-case:    LDX     1,i       ; cas si total1 = -1
+hr_min:  LDX     "a",i         ; si total1 est null
          LDA     total1,d
          CPA     -1,i
          BREQ    multi
 
-         LDX     2,i       ; cas si total2 = -1
+         LDX     "b",i         ; si total2 est null
          LDA     total2,d
          CPA     -1,i
          BREQ    multi
 
-multi:   LDA     minutes,d
-         CPA     -1,i
-         BREQ    invalid
-         LDA     heures,d    ; initialiser format(heures)
-         CPA     -1,i
-         BREQ    invalid
-
+multi:   LDA     heures,d    ; initialiser format(heures)
          ASLA                ; * 2
          ASLA                ; * 4
          ADDA    heures,d    ; * 5 
@@ -149,24 +136,19 @@ multi:   LDA     minutes,d
          ASLA                ; * 60
          ADDA    minutes,d   ; heures(en min) + minutes
          
-         CPX     1,i 
+         CPX     "a",i 
          BREQ    ajout1 
-         CPX     2,i
+
+         CPX     "b",i
          BREQ    ajout2
 
 ajout1:  STA     total1,d
-         BREQ    exec
+         BREQ    main 
 
 ajout2:  STA     total2,d
-         BREQ    calcul         
+         BREQ    main         
 
-calcul:  LDA     total1,d
-         CPA     -1,i
-         BREQ    invalid
-         LDA     total2,d
-         CPA     -1,i
-         BREQ    invalid
-         LDX     -1,i
+calcul:  LDA     total2,d
          CPA     total1,d
          BRLT    resultA
          BRNE    resultB
@@ -174,14 +156,15 @@ calcul:  LDA     total1,d
 
 resultA: ADDA    1440,i
          SUBA    total1,d
-         BR      divise
+         BR      convert
 
 resultB: SUBA    total1,d
-         BR      divise
+         BR      convert
 
 resultC: LDA     1440,i   
-         BR      divise
+         BR      convert
 
+convert: LDX     -1,i
 divise:  ADDX    1,i  
          SUBA    60,i
          BRGE    divise
@@ -190,44 +173,57 @@ divise:  ADDX    1,i
          STX     heures,d
          BR      affiche
 
-affiche: STRO    msgRes,d
+affiche: STRO    msgresul,d
          DECO    heures,d 
          CHARO   "h",i
          LDA     minutes,d
          CPA     10,i
-         BRLT    minDble 
-         DECO    minutes,d
-         BR      main
+         BRLT    simple
+         BR      double 
 
-minDble: DECO    0,i
-         DECO    minutes,d
-         BR      main
+simple:  DECO    0,i
+double:  DECO    minutes,d
 
-fin:     STRO    msgFin,d
-         STOP 
+vider:   LDBYTEA caract,d
+         CPA     10,i
+         BREQ    depart
+         CHARI   caract,d
+         BR      vider
+
+invalid: STRO    msginval,d 
+         BR      vider
+
+sortir:  LDA     total2,d
+         CPA     -1,i
+         BREQ    invalid    
+
+fin:     STRO    msgfin,d 
+         STOP
 
 ; Déclaration des variables
-  
-msgInv:  .ASCII  "\nEntrée invalide"
-         .BYTE   0 
 
-msgFin:  .ASCII  "\nFin normal du programme"
+msgentre:.ASCII  "Bienvenu au programme: Le Temps Écoulé\n"
+         .ASCII  "----------------------------------------"
+         .ASCII  "\nFORMAT: H HH H.MM ou HH.MM"
+         .ASCII  "\nQUITTER: appuyez sur la touche entrée"
+         .ASCII  "\nEX: 3 8  3.05  12.20"
+         .BYTE   0 
+msgdebut:.ASCII  "\n\nEntrez les heures désirées: "
+         .BYTE   0
+msgresul:.ASCII  "\nTemps écoulé: "
+         .BYTE   0
+msginval:.ASCII  "\nEntrée invalide"
+         .BYTE   0 
+msgfin:  .ASCII  "\nVous avez quitté avec succès.\n"
          .BYTE   0
 
-msgRes:  .ASCII  "\nTemps écoulé: "
-         .BYTE   0 
-         
-demande: .ASCII  "\nEntré les heures désirés: "
-         .BYTE   0 
 
-nbCarac: .Block  2 ; #2h
-active:  .BLOCK  2 ; #2h
-col:     .BLOCK  2 ; #2h
-entree:  .BLOCK  1 ; #1h
-tmpAcc:  .BLOCK  2 ; #2h       
-total1: .BLOCK  2 ; #2h 
-total2: .BLOCK  2 ; #2h
-heures:  .BLOCK  2 ; #2h
-minutes: .BLOCK  2 ; #2h
+caract:  .BLOCK  1          ; #1h
+tmpacc:  .BLOCK  2          ; #2h
+heures:  .BLOCK  2          ; #2h
+minutes: .BLOCK  2          ; #2h
+total1:  .BLOCK  2          ; #2d
+total2:  .BLOCK  2          ; #2d
 
-         .END
+
+         .END 
