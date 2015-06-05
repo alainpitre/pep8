@@ -1,70 +1,88 @@
+; ******************************************************************** 
+;       Programme: temps.txt     version PEP813 sous Windows
+;
+;       titre: Le temps écoulé
+;
+;       Le programme désiré devra fonctionner sous Windows avec la version PEP 813.
+;       Suite à une demande à l'utilisateur (lui expliquant le mode de fonctionnement),
+;       vous devrez calculer le temps écoulé entre 2 heures.
+;
+;       auteur:   Alain Pitre
+;       courriel: pitre.alain@courrier.uqam.ca
+;       date:     Ete 2015
+;       cours:    INF2170
+; ********************************************************************
+
+         STRO    msgentre,d 
+
 depart:  LDA     -1,i
          STA     total1,d
          STA     total2,d
-         LDA     0,i
-         STRO    demande,d 
+         STRO    msgdebut,d
+         BR      main
 
-boucle:  CHARI   chaine,d 
-         LDBYTEA chaine,d
+main:    LDBYTEA caract,d
+         CPA     10,i
+         BREQ    calcul
+
+boucle:  CHARI   caract,d 
+         LDBYTEA caract,d
          CPA     ' ',i
          BREQ    boucle
          CPA     '.',i
          BREQ    boucle
          CPA     10,i
-         BREQ    fin 
-
+         BREQ    sortir 
          LDX     0,i
-         BR      lirehr  
+         LDA     0,i
+         STA     heures,d
+         STA     minutes,d
+         BR      lire  
 
-lirehr:  ADDX    1,i
-         CPA     ' ',i
-         BREQ    suivant
-         CPA     10,i
-         BREQ    suivant
-         CPA     '.',i
-         BREQ    suivant
-         CPX     3,i
-         BREQ    invalid
+lirehr:  CHARI   caract,d
+         LDBYTEA caract,d
+lire:    ADDX    1,i
          CPA     '0',i
-         BRLT    invalid
+         BRLT    paschif
          CPA     '9',i
-         BRGT    invalid
+         BRGT    paschif
          SUBA    '0',i   
          STA     tmpacc,d 
          CPX     2,i
-         BREQ    hrdeci 
+         BREQ    dixhr 
          CPA     0,i
-         BREQ    zero
+         BREQ    avance
          STA     heures,d
-         CHARI   chaine,d
-         LDBYTEA chaine,d
          BR      lirehr
 
-zero:    CHARI   chaine,d
-         LDBYTEA chaine,d
-         CPA     '.',i
-         BREQ    suivant    
+avance:  CHARI   caract,d
+         LDBYTEA caract,d
+
+paschif: CPA     '.',i
+         BREQ    finhr    
          CPA     ' ',i
-         BREQ    switch   
+         BREQ    hr_min 
+         CPA     10,i
+         BREQ    hr_min
          BR      invalid 
 
-hrdeci:  LDA     heures,d
+dixhr:   LDA     heures,d
          ASLA
          ASLA
          ADDA    heures,d
          ASLA
          ADDA    tmpacc,d 
          STA     heures,d
-         BR      zero
+         BR      avance
 
-suivant: LDA     heures,d
+finhr:   LDA     heures,d
          CPA     23,i
          BRGT    invalid
-         ; LDX     0,i
-         BR      switch 
+         LDX     0,i
 
-liremin: CHARI   chaine,d
-         LDBYTEA chaine,d
+liremin: CHARI   caract,d
+         LDBYTEA caract,d
+
          ADDX    1,i
          CPA     '0',i
          BRLT    invalid
@@ -76,9 +94,9 @@ liremin: CHARI   chaine,d
          CPX     2,i
          BREQ    finmin
          CPX     1,i
-         BREQ    mindeci
+         BREQ    dixmin
         
-mindeci: ASLA
+dixmin:  ASLA
          ASLA
          ADDA    tmpacc,d 
          ASLA
@@ -86,26 +104,23 @@ mindeci: ASLA
          BR      liremin
 
 finmin:  STA     minutes,d
-         CHARI   chaine,d
-         LDBYTEA chaine,d
-         CPA     10,i
-         BREQ    switch
-         CPA     ' ',i
-         BRNE    invalid
-         LDA     minutes,d
          CPA     59,i
          BRGT    invalid
-         BR      fin 
+         CHARI   caract,d
+         LDBYTEA caract,d
 
-invalid: STRO    msgInv,d 
-         BR      fin
+         CPA     10,i
+         BREQ    hr_min 
+         CPA     ' ',i
+         BREQ    hr_min 
+         BR      invalid
 
-switch:  LDX     1,i       ; cas si total1 = -1
+hr_min:  LDX     "a",i         ; si total1 est null
          LDA     total1,d
          CPA     -1,i
          BREQ    multi
 
-         LDX     2,i       ; cas si total2 = -1
+         LDX     "b",i         ; si total2 est null
          LDA     total2,d
          CPA     -1,i
          BREQ    multi
@@ -121,24 +136,19 @@ multi:   LDA     heures,d    ; initialiser format(heures)
          ASLA                ; * 60
          ADDA    minutes,d   ; heures(en min) + minutes
          
-         CPX     1,i 
+         CPX     "a",i 
          BREQ    ajout1 
 
-         CPX     2,i
+         CPX     "b",i
          BREQ    ajout2
 
 ajout1:  STA     total1,d
-         BREQ    boucle 
+         BREQ    main 
 
 ajout2:  STA     total2,d
-         BREQ    calcul         
+         BREQ    main         
 
-calcul:  LDA     total1,d
-         CPA     -1,i
-         BREQ    invalid
-         LDA     total2,d
-         CPA     -1,i
-         BREQ    invalid
+calcul:  LDA     total2,d
          CPA     total1,d
          BRLT    resultA
          BRNE    resultB
@@ -154,7 +164,7 @@ resultB: SUBA    total1,d
 resultC: LDA     1440,i   
          BR      convert
 
-convert: LDA     -1,i
+convert: LDX     -1,i
 divise:  ADDX    1,i  
          SUBA    60,i
          BRGE    divise
@@ -163,7 +173,7 @@ divise:  ADDX    1,i
          STX     heures,d
          BR      affiche
 
-affiche: STRO    msgRes,d
+affiche: STRO    msgresul,d
          DECO    heures,d 
          CHARO   "h",i
          LDA     minutes,d
@@ -174,27 +184,41 @@ affiche: STRO    msgRes,d
 simple:  DECO    0,i
 double:  DECO    minutes,d
 
-vider:   LDBYTEA chaine,d
+vider:   LDBYTEA caract,d
          CPA     10,i
          BREQ    depart
-         CHARI   chaine,d
+         CHARI   caract,d
          BR      vider
+
+invalid: STRO    msginval,d 
+         BR      vider
+
+sortir:  LDA     total2,d
+         CPA     -1,i
+         BREQ    invalid    
 
 fin:     STRO    msgfin,d 
          STOP
 
 ; Déclaration des variables
-  
-msgInv:  .ASCII  "\nEntrée invalide"
-         .BYTE   0 
-msgfin:  .ASCII  "\nFin normal du programme"
-         .BYTE   0
-msgRes:  .ASCII  "\nTemps écoulé: "
-         .BYTE   0      
-demande: .ASCII  "\nEntré les heures désirés: "
-         .BYTE   0 
 
-chaine:  .BLOCK  1          ; #1h
+msgentre:.ASCII  "Bienvenu au programme: Le Temps Écoulé\n"
+         .ASCII  "----------------------------------------"
+         .ASCII  "\nFORMAT: H HH H.MM ou HH.MM"
+         .ASCII  "\nQUITTER: appuyez sur la touche entrée"
+         .ASCII  "\nEX: 3 8  3.05  12.20"
+         .BYTE   0 
+msgdebut:.ASCII  "\n\nEntrez les heures désirées: "
+         .BYTE   0
+msgresul:.ASCII  "\nTemps écoulé: "
+         .BYTE   0
+msginval:.ASCII  "\nEntrée invalide"
+         .BYTE   0 
+msgfin:  .ASCII  "\nVous avez quitté avec succès.\n"
+         .BYTE   0
+
+
+caract:  .BLOCK  1          ; #1h
 tmpacc:  .BLOCK  2          ; #2h
 heures:  .BLOCK  2          ; #2h
 minutes: .BLOCK  2          ; #2h

@@ -1,0 +1,29 @@
+Bienvenu au programme: Le Temps Écoulé
+----------------------------------------
+FORMAT: H HH H.MM ou HH.MM
+QUITTER: appuyez sur la touche entrée
+EX: 3 8  3.05  12.20
+
+Entrez les heures désirées: 3 8
+
+Temps écoulé: 5h00
+
+Entrez les heures désirées: 8 3
+
+Temps écoulé: 19h00
+
+Entrez les heures désirées: 10.20 12
+
+Temps écoulé: 1h40
+
+Entrez les heures désirées: 8.53 7.52
+
+Temps écoulé: 22h59
+
+Entrez les heures désirées: 0 23.59
+
+Temps écoulé: 23h59
+
+Entrez les heures désirées: 
+
+Vous avez quitté avec succès.
