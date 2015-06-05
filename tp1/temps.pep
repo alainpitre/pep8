@@ -21,44 +21,52 @@ main:    LDA     -1,i        ; initialisation des variables
 
          STRO    demande,d
 
-exec:    LDA     0,i         ; reinitialistion des variables
-         STA     active,d
+exec:    LDA     -1,i         ; reinitialistion des variables
          STA     heures,d
          STA     minutes,d
+         LDA     0,i
+         STA     entree,d
          STA     nbCarac,d
          LDX     col,d       ; recupérer la colonne courante 
          BR      lire
 
-lire:    ADDX    1,i
-         CPX     20,i
-         BRGE    sortir
-         
-         CHARI   entree,d    ; ajouter une lettre
+lire:    CHARI   entree,d    ; ajouter une lettre
          LDBYTEA entree,d
 
-         CPA     10,i        
-         BREQ    sortir      ; sortir si touche ENTER
+         ADDX    1,i
+         CPX     20,i
+         BRGE    sortir
+
+         CPA     10,i        ; sortir si touche ENTER
+         BREQ    sortir
 
          CPA     '.',i       ; analyse l'entrée
          BREQ    lireMin
-
          CPA     ' ',i       
-         BREQ    suivant
-
+         BREQ    break
          CPA    '0',i
          BRLT    invalid
-
          CPA    '9',i
          BRGT    invalid
 
          SUBA    '0',i
          STA     tmpAcc,d 
 
-         LDA     1,i
-         STA     active,d
+         LDA     heures,d
+         CPA     -1,i
+         BREQ    initHr
+         BR      lireHr
 
-         LDA     heures,d    
-         ASLA
+break:   LDA     heures,d 
+         CPA     -1,i
+         BREQ    lire
+         BR      case
+
+initHr:  LDA     0,i
+         STA     heures,d
+         BR      lireHr
+
+lireHr:  ASLA
          ASLA
          ADDA    heures,d
          ASLA
@@ -66,60 +74,49 @@ lire:    ADDX    1,i
          CPA     23,i
          BRGT    invalid
          STA     heures,d
-
          BR      lire  
 
 lireMin: ADDX    1,i
 
-         LDA     active,d
-         CPA     1,i
-         BRNE    invalid  
-
          CHARI   entree,d
          LDBYTEA entree,d
          
-         CPA    '0',i
+         CPA     '0',i
          BRLT    invalid
-         CPA    '9',i
+         CPA     '9',i
          BRGT    invalid
 
          SUBA    '0',i
          STA     tmpAcc,d 
 
-         LDA     nbCarac,d
-         CPA     0,i
-         BREQ    minDix
-         
-         LDA     tmpAcc,d
-         ADDA    minutes,d
-         CPA     59,i
-         BRGT    invalid
-         STA     minutes,d
-         BR      lire 
-  
+         LDA     nbCarac,d   ; increment caractère minute
+         ADDA    1,i
+         STA     nbCarac,d
 
-minDix:  LDA     tmpAcc,d
+         CPA     1,i
+         BREQ    dixaine
+         CPA     2,i
+         BREQ    unitee
+         BR      invalid         
+
+dixaine: LDA     tmpAcc,d
          ASLA
          ASLA
          ADDA    tmpAcc,d
          ASLA
          STA     minutes,d
-
-         LDA     nbCarac,d   ; increment caractère minute
-         ADDA    1,i
-         STA     nbCarac,d
-
          BR      lireMin
 
+unitee:  LDA     tmpAcc,d
+         ADDA    minutes,d
+         CPA     59,i
+         BRGT    invalid
+         STA     minutes,d
+         BR      lireMin
 
 sortir:  LDA     active,d 
          CPA     1,i
          BRNE    calcul 
-         BR      case
-
-suivant: LDA     active,d 
-         CPA     1,i
-         BRNE    lire
          BR      case
 
 invalid: STRO    msgInv,d 
@@ -127,15 +124,21 @@ invalid: STRO    msgInv,d
          
 case:    LDX     1,i       ; cas si total1 = -1
          LDA     total1,d
-         CPA     0,i
-         BRLT    multi
+         CPA     -1,i
+         BREQ    multi
 
          LDX     2,i       ; cas si total2 = -1
          LDA     total2,d
-         CPA     0,i
-         BRLT    multi
+         CPA     -1,i
+         BREQ    multi
 
-multi:   LDA     heures,d    ; initialiser format(heures)
+multi:   LDA     minutes,d
+         CPA     -1,i
+         BREQ    invalid
+         LDA     heures,d    ; initialiser format(heures)
+         CPA     -1,i
+         BREQ    invalid
+
          ASLA                ; * 2
          ASLA                ; * 4
          ADDA    heures,d    ; * 5 
@@ -148,7 +151,6 @@ multi:   LDA     heures,d    ; initialiser format(heures)
          
          CPX     1,i 
          BREQ    ajout1 
-         
          CPX     2,i
          BREQ    ajout2
 
@@ -156,7 +158,7 @@ ajout1:  STA     total1,d
          BREQ    exec
 
 ajout2:  STA     total2,d
-         BREQ    exec         
+         BREQ    calcul         
 
 calcul:  LDA     total1,d
          CPA     -1,i
@@ -177,7 +179,8 @@ resultA: ADDA    1440,i
 resultB: SUBA    total1,d
          BR      divise
 
-resultC: BR      divise   
+resultC: LDA     1440,i   
+         BR      divise
 
 divise:  ADDX    1,i  
          SUBA    60,i
