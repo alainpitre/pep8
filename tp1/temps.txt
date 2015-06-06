@@ -1,11 +1,11 @@
 ; ******************************************************************** 
 ;       Programme: temps.txt     version PEP813 sous Windows
 ;
-;       titre: Le temps ÈcoulÈ
+;       titre: Le temps √©coul√©
 ;
-;       Le programme dÈsirÈ devra fonctionner sous Windows avec la version PEP 813.
-;       Suite ‡ une demande ‡ l'utilisateur (lui expliquant le mode de fonctionnement),
-;       vous devrez calculer le temps ÈcoulÈ entre 2 heures.
+;       Le programme d√©sir√© devra fonctionner sous Windows avec la version PEP 813.
+;       Suite √† une demande √† l'utilisateur (lui expliquant le mode de fonctionnement),
+;       vous devrez calculer le temps √©coul√© entre 2 heures.
 ;
 ;       auteur:   Alain Pitre
 ;       courriel: pitre.alain@courrier.uqam.ca
@@ -65,7 +65,7 @@ avance:  LDA     cols,d      ; incremente colonnes
          CHARI   caract,d
          LDBYTEA caract,d
 
-paschif: LDX     0,i         ; reinitialiser ‡ pour lire minutes
+paschif: LDX     0,i         ; reinitialiser √† z√©ro pour lire minutes
          CPA     '.',i
          BREQ    liremin    
          CPA     ' ',i
@@ -213,21 +213,21 @@ sortir:  LDA     total1,d
 fin:     STRO    msgfin,d
          STOP
 
-; DÈclaration des variables
+; D√©claration des variables
 
-msgentre:.ASCII  "Bienvenu au programme: Le Temps …coulÈ\n"
+msgentre:.ASCII  "Bienvenu au programme: Le Temps √âcoul√©\n"
          .ASCII  "----------------------------------------"
          .ASCII  "\nFORMAT: H HH H.MM ou HH.MM"
-         .ASCII  "\nQUITTER: appuyez sur la touche entrÈe"
+         .ASCII  "\nQUITTER: appuyez sur la touche entr√©e"
          .ASCII  "\nEX: 3 8  3.05  12.20"
          .BYTE   0 
-msgdebut:.ASCII  "\n\nEntrez les heures dÈsirÈes: "
+msgdebut:.ASCII  "\n\nEntrez les heures d√©sir√©es: "
          .BYTE   0
-msgresul:.ASCII  "\nTemps ÈcoulÈ: "
+msgresul:.ASCII  "\nTemps √©coul√©: "
          .BYTE   0
-msginval:.ASCII  "\nEntrÈe invalide"
+msginval:.ASCII  "\nEntr√©e invalide"
          .BYTE   0 
-msgfin:  .ASCII  "\nVous avez quittÈ avec succËs.\n"
+msgfin:  .ASCII  "\nVous avez quitt√© avec succ√®s.\n"
          .BYTE   0
 
 
